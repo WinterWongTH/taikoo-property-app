@@ -1,0 +1,24 @@
+name: Daily Taikoo Shing Update
+on:
+  schedule:
+    - cron: '0 13 * * *'  # 每天香港時間晚上 9:00 自動執行
+  workflow_dispatch:      # 允許隨時手動點擊「Run workflow」立即更新
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: pip install -r requirements.txt
+      - run: python scraper.py
+      - run: |
+          git config --local user.email "bot@github.com"
+          git config --local user.name "Auto Update Bot"
+          git add *.csv
+          git commit -m "Daily auto update" || exit 0
+          git push
